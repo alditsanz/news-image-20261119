@@ -2,6 +2,40 @@
 """Draw Thursday 19 November 2026's world news as a single newspaper
 front page and write it to /output/entry.png (1024x1024 PNG).
 
+LATE EDITION (round 2, revised Friday 20 November): round 1 was drawn
+while the day was still unfolding. This revision replaces the three
+panels whose stories have since landed with their actual outcomes:
+
+  lead  - the Shenzhen trilateral is OVER: Trump, Xi and Putin signed
+          a four-point joint "Declaration toward Peace" (UN reform,
+          refined-oil supply, ICC jurisdiction limits, nuclear-risk
+          dialogue). No breakthrough: Ukraine and Iran untouched, no
+          nuclear cuts. Separately, Trump and Xi extended the US-China
+          trade truce (terms undisclosed).
+  1     - MARKETS: Thursday's Wall Street close was a rout: S&P 500
+          -2.02% (sixth straight loss), Dow -1,101 to 49,097, first
+          close below 50,000 since June, Nasdaq -2.25%, VIX about 28.5.
+          The early Anthropic-debut rally faded by late morning.
+  2     - TECH: Anthropic's ANT debut is DONE: priced $83, opened
+          $111.50 (+34%), high $115.10, closed $97.17 (+17%); about
+          846m shares traded, Nasdaq's most-traded name; $81.34bn
+          raised (980m shares at $83).
+  3     - GULF: Wednesday's events stand (Iran drones at Ali Al-Salem
+          airbase in Kuwait, Bahrain intercepted attacks again, tanker
+          struck near Khasab in Hormuz); no new strikes Thursday;
+          Gulf states, Pakistan and Turkey push diplomacy.
+  4     - CLIMATE: COP31's Thursday draft cover decision slimmed from
+          144 paragraphs to 80 and removed EVERY fossil-fuel reference;
+          still a draft, not adopted, as the summit closes Friday.
+  5     - HEALTH: Ebola deaths pass 5,500 in DR Congo; 11,000+ cases;
+          still not under control.
+  6     - POLITICS: Democrats nominate Hakeem Jeffries for Speaker,
+          251-11; would be the first Black Speaker (vote Jan 3).
+  also  - US AI-chip export curbs took effect Thu; Zverev sweeps his
+          Turin group 3-0 and Shelton joins him in the semifinals;
+          Voyager 1 one light-day out; GTA VI rolls out worldwide.
+  The unverified North Korea missile claim stays excluded.
+
 Standard library only. Everything is drawn by this program: a small
 PNG encoder (zlib + struct), a hand-drawn 5x7 bitmap font, and all
 shapes (rectangles, lines, circles, polygons) used for the masthead,
@@ -9,25 +43,6 @@ the Shenzhen summit hero illustration and the six story panels.
 
 Deterministic: no wall clock, no randomness, no dict-order dependence.
 Running it twice produces byte-identical output.
-
-Stories used (all reported 19 November 2026, see research-nov19.md):
-  lead  - Trump, Xi and Putin meet in Shenzhen for the first-ever
-          three-way summit of the three leaders; nuclear arms on
-          the agenda, no deal expected
-  1     - Iran hits a US airbase in Kuwait and strikes Bahrain
-          again; a tanker is hit in the Strait of Hormuz
-  2     - Fed minutes hawkish: more hikes likely; Dow -1.1% to
-          50,198, fifth straight loss; Asia slides Thursday
-  3     - Anthropic debuts on Nasdaq as ANT, priced at $83;
-          grey market about $98, up 18%
-  4     - US AI-chip export curbs take effect: licences needed
-          for five countries
-  5     - Ebola deaths pass 5,500 in DR Congo; 11,000+ cases;
-          Africa CDC says still not under control
-  6     - Democrats nominate Hakeem Jeffries for Speaker, 251-11;
-          would be the first Black Speaker
-  also  - COP31 deadlocked in Antalya; Voyager 1 one light-day
-          out, NASA confirms today; GTA VI rolls out worldwide
 """
 
 import math
@@ -350,7 +365,6 @@ def draw_flag_ru(cv, x, y, w, h):
 def icon_tanker(cv, x, y, w, h):
     """Oil tanker in the Strait, flame from a hit. Fits its box."""
     cx = x + w // 2
-    cy = y + h // 2
     # sea (bottom of the box)
     cv.rect(x, y + 36, w, h - 36, (38, 98, 138))
     cv.hline(x + 8, x + w - 8, y + 42, (24, 74, 110), 2)
@@ -371,9 +385,8 @@ def icon_tanker(cv, x, y, w, h):
 
 
 def icon_chart_down(cv, x, y, w, h):
-    """Falling market line over bars. Fits its box."""
+    """Falling market line over bars, breaking a floor. Fits its box."""
     cx = x + w // 2
-    cy = y + h // 2
     # bars
     base = y + 44
     for i, bh in enumerate((8, 13, 7, 16, 10, 5)):
@@ -382,18 +395,24 @@ def icon_chart_down(cv, x, y, w, h):
     # axes
     cv.hline(cx - 72, cx + 72, base, INK, 2)
     cv.vline(cx - 72, y + 6, base, INK, 2)
-    # falling line
-    pts = [(cx - 66, y + 10), (cx - 40, y + 18), (cx - 14, y + 14),
-           (cx + 12, y + 28), (cx + 38, y + 32), (cx + 64, y + 42)]
+    # the 50,000 floor, dashed, snapped where the line crosses it
+    for dx in range(cx - 66, cx + 8, 12):
+        cv.hline(dx, dx + 6, y + 30, GOLD, 2)
+    for dx in range(cx + 26, cx + 70, 12):
+        cv.hline(dx, dx + 6, y + 34, GOLD, 2)
+    # falling line: morning rally, then the rout
+    pts = [(cx - 66, y + 16), (cx - 40, y + 8), (cx - 14, y + 18),
+           (cx + 12, y + 30), (cx + 38, y + 36), (cx + 64, y + 43)]
     for a, b in zip(pts, pts[1:]):
         cv.line(a[0], a[1], b[0], b[1], RED, 4)
     # down arrowhead
-    cv.poly([(cx + 64, y + 42), (cx + 52, y + 42), (cx + 64, y + 30)],
+    cv.poly([(cx + 64, y + 43), (cx + 52, y + 43), (cx + 64, y + 31)],
             RED)
+    draw_text(cv, "50,000", cx - 70, y + 21, 1, GOLD)
 
 
 def icon_chip_ant(cv, x, y, w, h):
-    """AI chip with ANT ticker and a $83 tag. Fits its box."""
+    """AI chip with ANT ticker and the $97.17 close tag. Fits its box."""
     cx = x + w // 2 - 16
     cy = y + h // 2
     s = 30
@@ -407,39 +426,43 @@ def icon_chip_ant(cv, x, y, w, h):
     cv.rect(cx - s // 2, cy - s // 2, s, 4, GREEN2)
     cv.rect(cx - 13, cy - 8, 26, 16, (225, 248, 228))
     draw_text(cv, "ANT", cx - 11, cy - 5, 2, INK)
-    # $83 price tag, bottom right
-    tx = x + w - 78
+    # closing-price tag, bottom right: $97.17, still +17% on the day
+    tx = x + w - 92
     ty = y + h - 20
-    cv.rect(tx, ty, 70, 18, RED)
-    draw_text(cv, "$83", tx + 6, ty + 3, 2, WHITE)
-    # rising arrow, top right
-    ax = x + w - 66
-    ay = y + 6
-    cv.line(ax, ay + 12, ax + 14, ay + 2, GREEN, 4)
-    cv.line(ax + 14, ay + 2, ax + 28, ay + 8, GREEN, 4)
-    cv.poly([(ax + 28, ay + 8), (ax + 16, ay + 8), (ax + 28, ay - 2)],
-            GREEN)
+    cv.rect(tx, ty, 84, 18, GREEN2)
+    draw_text(cv, "$97.17", tx + 7, ty + 3, 2, WHITE)
+    # the fade: up to the $111.50 open, then down into the close
+    ax = x + w - 84
+    ay = y + 4
+    cv.line(ax, ay + 14, ax + 16, ay + 2, GREEN, 4)
+    cv.line(ax + 16, ay + 2, ax + 34, ay + 12, RED, 4)
+    cv.poly([(ax + 34, ay + 12), (ax + 22, ay + 12), (ax + 34, ay + 2)],
+            RED)
+    draw_text(cv, "+34%", ax + 44, ay + 2, 1, GREEN2)
+    draw_text(cv, "OPEN", ax + 44, ay + 11, 1, GREY)
 
 
-def icon_shield_chip(cv, x, y, w, h):
-    """Shield over a chip: export controls. Fits its box."""
+def icon_climate(cv, x, y, w, h):
+    """Draft document with the fossil-fuel drop struck out. Fits box."""
     cx = x + w // 2
-    cy = y + h // 2
-    # shield outline
-    cv.poly([(cx - 30, y + 2), (cx + 30, y + 2), (cx + 30, y + 24),
-             (cx, y + 48), (cx - 30, y + 24)], NAVY2)
-    cv.poly([(cx - 23, y + 8), (cx + 23, y + 8), (cx + 23, y + 22),
-             (cx, y + 40), (cx - 23, y + 22)], PAPER2)
-    # small chip inside
-    cv.rect(cx - 9, cy - 9, 18, 18, GREEN)
-    cv.rect(cx - 9, cy - 9, 18, 3, GREEN2)
-    for dx in (-12, 12):
-        cv.rect(cx + dx - 2, cy - 3, 4, 6, GREEN2)
-    for dy in (-12, 12):
-        cv.rect(cx - 3, cy + dy - 2, 6, 4, GREEN2)
-    # licence stamp, bottom right
-    cv.rect(x + w - 98, y + 32, 92, 14, RED2)
-    draw_text(cv, "LICENCE", x + w - 93, y + 34, 2, WHITE)
+    # the draft page, left of centre
+    px, py, pw, ph = cx - 108, y + 3, 62, 44
+    cv.rect(px, py, pw, ph, WHITE)
+    cv.rect(px, py, pw, 2, LINE)
+    cv.rect(px, py + ph - 2, pw, 2, LINE)
+    cv.rect(px, py, 2, ph, LINE)
+    cv.rect(px + pw - 2, py, 2, ph, LINE)
+    for i in range(4):
+        cv.hline(px + 8, px + pw - 8, py + 9 + i * 9, SMOKE, 2)
+    draw_text(cv, "DRAFT", px + 8, py + ph - 12, 1, GREY)
+    # the fuel drop, right of centre, struck through in red
+    dx, dy = cx + 42, y + 26
+    cv.poly([(dx, y + 6), (dx - 11, dy + 4), (dx + 11, dy + 4)], STEEL2)
+    cv.disc(dx, dy + 6, 11, STEEL2)
+    cv.disc(dx - 3, dy + 4, 3, (120, 126, 134))
+    cv.line(dx - 18, y + 44, dx + 18, y + 8, RED, 5)
+    draw_text(cv, "FOSSIL", dx + 30, y + 12, 2, RED2)
+    draw_text(cv, "CUT", dx + 30, y + 28, 2, RED2)
 
 
 def icon_virus(cv, x, y, w, h):
@@ -481,7 +504,8 @@ def icon_capitol(cv, x, y, w, h):
 # ---------------------------------------------------------------- hero
 
 def draw_hero(cv, x, y, w, h):
-    """Shenzhen summit: three flags over a long table at Kylin Villa."""
+    """Shenzhen summit: three flags over the table at Kylin Villa,
+    the signed declaration lying on the table."""
     # sky bands
     cv.rect(x, y, w, h // 2, SKY1)
     cv.rect(x, y + h // 2, w, h - h // 2, SKY2)
@@ -524,27 +548,40 @@ def draw_hero(cv, x, y, w, h):
         px = sx + i * (fw + gap) + fw // 2 - 16
         cv.rect(px, ty - 12, 32, 10, PAPER2)
         draw_text(cv, tag, px + 4, ty - 10, 1, INK)
-    # "FIRST-EVER" tag
-    cv.rect(x + 14, y + 10, 220, 26, RED)
-    draw_text(cv, "FIRST-EVER SUMMIT", x + 24, y + 16, 2, WHITE)
+    # the signed declaration on the table, red seal on it; placed
+    # right of centre so all three name plates stay readable
+    dx = x + w // 2 + 58
+    cv.rect(dx, ty - 15, 42, 13, WHITE)
+    cv.rect(dx, ty - 15, 42, 1, LINE)
+    cv.rect(dx, ty - 3, 42, 1, LINE)
+    cv.hline(dx + 5, dx + 26, ty - 11, SMOKE, 1)
+    cv.hline(dx + 5, dx + 26, ty - 8, SMOKE, 1)
+    cv.disc(dx + 34, ty - 8, 4, RED)
+    # "DECLARATION SIGNED" tag
+    cv.rect(x + 14, y + 10, 240, 26, RED)
+    draw_text(cv, "DECLARATION SIGNED", x + 24, y + 16, 2, WHITE)
 
 
 # ---------------------------------------------------------------- page
 
 PANELS = [
     # (kicker, kicker colour, headline, body, icon fn)
-    ("GULF", RED2, "IRAN HITS US BASE IN KUWAIT",
-     "DRONES HIT ALI AL-SALEM. BAHRAIN HIT AGAIN. TANKER STRUCK IN HORMUZ.",
-     icon_tanker),
-    ("MARKETS", NAVY, "FED: MORE HIKES LIKELY",
-     "DOW -1.1% TO 50,198. FIFTH STRAIGHT LOSS. ASIA: TAIEX -3.7%.",
+    ("MARKETS", NAVY, "WALL STREET SINKS",
+     "S&P -2.02%, SIXTH STRAIGHT LOSS. DOW -1,101 BELOW 50,000. "
+     "NASDAQ -2.25%. VIX 28.5.",
      icon_chart_down),
-    ("TECH", GREEN, "ANTHROPIC DEBUTS TODAY AT $83",
-     "PRICED ABOVE ITS $70-$78 RANGE. NASDAQ AS ANT. GREY MARKET ABOUT $98.",
+    ("TECH", GREEN, "ANTHROPIC FADES TO +17%",
+     "OPENS $111.50, CLOSES $97.17 (+17%). 846M SHARES TRADED. "
+     "$81.3BN RAISED.",
      icon_chip_ant),
-    ("TRADE", TEAL, "US CHIP CURBS TAKE EFFECT TODAY",
-     "LICENCES NEEDED FOR AI CHIPS TO FIVE COUNTRIES. REMOTE ACCESS CLAMPED.",
-     icon_shield_chip),
+    ("GULF", RED2, "IRAN HITS US BASE IN KUWAIT",
+     "ALI AL-SALEM DRONED WED. BAHRAIN HIT AGAIN. TANKER STRUCK "
+     "IN HORMUZ. NO NEW STRIKES THU.",
+     icon_tanker),
+    ("CLIMATE", TEAL, "COP31 DROPS FOSSIL FUELS",
+     "DRAFT SLIMMED 144 TO 80, EVERY FOSSIL-FUEL LINE CUT. "
+     "STILL NOT ADOPTED.",
+     icon_climate),
     ("HEALTH", RED, "EBOLA DEATHS PASS 5,500",
      "11,000+ CASES IN CONGO. AFRICA CDC: STILL NOT UNDER CONTROL.",
      icon_virus),
@@ -589,7 +626,7 @@ def build():
     cv.rect(0, 108, W, 4, RED)
     draw_text(cv, "THE WORLD IN ONE DAY", W // 2, 22, 6, WHITE,
               align="center")
-    draw_text(cv, "THE DAY'S NEWS FROM EVERY CONTINENT",
+    draw_text(cv, "LATE EDITION - THE DAY'S OUTCOMES, UPDATED",
               W // 2, 82, 2, (190, 205, 220), align="center")
 
     # ---- date banner
@@ -605,11 +642,12 @@ def build():
     draw_hero(cv, hx + 2, hy + 2, hw - 4, 188)
     # headline block under the illustration
     ty = hy + 198
-    draw_text(cv, "TRUMP, XI AND PUTIN", hx + 14, ty, 5, INK)
-    draw_text(cv, "MEET IN SHENZHEN", hx + 14, ty + 38, 5, RED)
+    draw_text(cv, "TRUMP, XI AND PUTIN SIGN", hx + 14, ty, 5, INK)
+    draw_text(cv, "PEACE DECLARATION", hx + 14, ty + 38, 5, RED)
     draw_para(cv,
-              "FIRST-EVER THREE-WAY SUMMIT AT APEC. NUCLEAR ARMS TOP "
-              "THE AGENDA. NO DEAL EXPECTED.",
+              "4 POINTS: UN REFORM, OIL SUPPLY, ICC LIMITS, NUCLEAR "
+              "TALKS. NO DEAL ON UKRAINE. US-CHINA TRADE TRUCE "
+              "EXTENDED.",
               hx + 14, ty + 82, (hw - 28) // (CHAR_W * 2), 2, GREY)
 
     # ---- story grid: 3 columns x 2 rows
@@ -625,10 +663,9 @@ def build():
     fy = gy + 2 * ph + gap + 12
     cv.rect(24, fy, W - 48, 2, LINE)
     draw_para(cv,
-              "ALSO: COP31 DEADLOCKED IN ANTALYA - 21 ISSUES OPEN AS "
-              "TALKS CLOSE FRI. VOYAGER 1 ONE LIGHT-DAY OUT, NASA "
-              "CONFIRMS TODAY. GTA VI ROLLS OUT WORLDWIDE, BACK TO "
-              "VICE CITY.",
+              "ALSO: CHIP CURBS TAKE EFFECT - LICENCES FOR AI CHIPS. "
+              "ZVEREV SWEEPS GROUP 3-0, SHELTON IN SEMIS. VOYAGER 1 "
+              "ONE LIGHT-DAY OUT. GTA VI ROLLS OUT WORLDWIDE.",
               24, fy + 12, (W - 48) // (CHAR_W * 2), 2, INK)
     # ---- bottom credit bar
     cv.rect(0, 988, W, 36, NAVY)

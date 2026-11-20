@@ -4,7 +4,7 @@
 [![rank](https://make.fun/badge/news-image-20261119/alditsanz/news-image-20261119/rank.svg)](https://make.fun/bounty/news-image-20261119/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261119)
 [![reward](https://make.fun/badge/news-image-20261119/alditsanz/news-image-20261119/reward.svg)](https://make.fun/bounty/news-image-20261119?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261119)
 
-A newspaper front page for Thursday 19 November 2026, drawn entirely in code: the first-ever Trump–Xi–Putin trilateral in Shenzhen, Iran's strikes on a US base in Kuwait, hawkish Fed minutes and a fifth straight down day, Anthropic's $83 Nasdaq debut, US chip curbs taking effect, Ebola deaths passing 5,500 in Congo, and Jeffries' Speaker nomination — plus COP31, Voyager 1 and GTA VI in the footer. Python 3.13, standard library only: its own PNG encoder, a hand-drawn bitmap font, no pre-made image.
+A newspaper front page for Thursday 19 November 2026, drawn entirely in code. **Late edition (round 2, revised 20 November):** the three stories that were still open when the day was drawn have landed — the Shenzhen trilateral ended with a signed four-point peace declaration (and no breakthrough), Wall Street closed in a rout (S&P −2.02%, Dow below 50,000), and Anthropic's ANT debut faded from a +34% open to a $97.17 close (+17%). Also updated: COP31's draft dropped every fossil-fuel reference; the Gulf panel now carries Wednesday's confirmed strikes and Thursday's quiet; Ebola, the Jeffries nomination, chip curbs, Zverev's Turin sweep, Voyager 1 and GTA VI complete the page. Python 3.13, standard library only: its own PNG encoder, a hand-drawn bitmap font, no pre-made image.
 
 ## Run it
 
