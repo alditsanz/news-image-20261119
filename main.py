@@ -528,77 +528,229 @@ def icon_politics(cv, x, y):
     cv.rect(cx - 44, y + 46, 88, 5, NAVY)
 
 
-PANELS = [
-    ("MARKETS", RED, "WALL STREET SINKS",
-     "S&P -2.02%, SIXTH STRAIGHT LOSS. DOW -1,101 BELOW 50,000. "
-     "NASDAQ -2.25%. VIX 28.5.", icon_markets),
-    ("TECH", GREEN_DARK, "ANTHROPIC FADES TO +17%",
-     "OPENS $111.50, CLOSES $97.17 (+17%). 846M SHARES TRADED. "
-     "$81.3BN RAISED.", icon_tech),
-    ("GULF", BLUE, "IRAN HITS US BASE IN KUWAIT",
-     "ALI AL-SALEM DRONED WED. BAHRAIN HIT AGAIN. TANKER STRUCK "
-     "IN HORMUZ. NO NEW STRIKES THU.", icon_gulf),
-    ("CLIMATE", TEAL, "COP31 DROPS FOSSIL FUELS",
-     "DRAFT SLIMMED 144 TO 80, EVERY FOSSIL-FUEL LINE CUT. "
-     "STILL NOT ADOPTED.", icon_climate),
-    ("HEALTH", PURPLE, "EBOLA DEATHS PASS 5,500",
-     "11,000+ CASES IN CONGO. AFRICA CDC: STILL NOT UNDER "
-     "CONTROL.", icon_health),
-    ("POLITICS", NAVY_SOFT, "JEFFRIES PICKED FOR SPEAKER",
-     "DEMOCRATS VOTE 251-11, WOULD BE FIRST BLACK SPEAKER. "
-     "VOTE JAN 3.", icon_politics),
-]
+
+# ------------------------------------------------------------------
+# Round 3 page: dark slate + amber front page. Date is the masthead,
+# a figures strip follows, then numbered panels, an also-list with a
+# dot-grid pin map and a how-sure legend, and a date-check footer.
+# ------------------------------------------------------------------
+
+SLATE = (31, 41, 55)
+SLATE_DARK = (17, 24, 35)
+AMBER = (232, 164, 28)
+AMBER_SOFT = (246, 197, 92)
+PAGE = (246, 244, 238)
+PANEL_BG = (255, 255, 255)
+BODY_INK = (52, 55, 62)
+C_SHENZHEN = (150, 30, 40)
+C_ICJ = (62, 52, 140)
+C_MARKET = (160, 40, 20)
+C_TECH = (18, 94, 54)
+C_BERLIN = (36, 84, 168)
+C_GULF = (120, 72, 10)
+C_COP = (18, 110, 110)
+C_EBOLA = (104, 40, 130)
+C_FLORIDA = (30, 110, 160)
+C_CHIP = (70, 70, 78)
+C_GTA = (170, 60, 110)
+C_SPACE = (40, 50, 130)
+C_SPORT = (30, 120, 70)
 
 
-def draw_panel(cv, px, py, pw, ph, panel):
-    kicker, colour, headline, body, icon_fn = panel
-    cv.rect(px, py, pw, ph, WHITE)
-    cv.frame(px, py, pw, ph, NAVY, 2)
-    cv.rect(px, py, pw, 24, colour)
-    draw_text(cv, px + 9, py + 5, kicker, 2, WHITE)
-    icon_fn(cv, px + 8, py + 30)
-    head_y = py + 92
-    head_end = draw_paragraph(cv, px + 9, head_y, headline, 2, INK,
-                              pw - 18, line_gap=3, max_lines=2)
-    body_y = max(head_end + 2, py + 126)
-    draw_paragraph(cv, px + 9, body_y, body, 2, (52, 52, 58),
-                   pw - 18, line_gap=3, max_lines=4)
+def panel(cv, x, y, w, h, num, label, colour, headline, body, src,
+          head_scale=2):
+    cv.rect(x, y, w, h, PANEL_BG)
+    cv.frame(x, y, w, h, SLATE, 2)
+    cv.rect(x, y, w, 18, colour)
+    cv.circle(x + 10, y + 9, 7, WHITE)
+    draw_centered(cv, x + 10, y + 6, str(num), 1, colour)
+    draw_text(cv, x + 21, y + 6, label, 1, WHITE)
+    hy = y + 24
+    hy = draw_paragraph(cv, x + 7, hy, headline, head_scale, INK,
+                        w - 14, line_gap=2, max_lines=3)
+    by = hy + 3
+    draw_paragraph(cv, x + 7, by, body, 1, BODY_INK, w - 14,
+                   line_gap=3, max_lines=12)
+    draw_text(cv, x + 7, y + h - 12, src, 1, GREY)
 
 
 def build_page():
-    cv = Canvas(WIDTH, HEIGHT, PAPER)
-    draw_masthead(cv)
-    draw_hero(cv)
-    # Hero headline and standfirst under the picture.
-    draw_centered(cv, WIDTH // 2, 330, "TRUMP, XI AND PUTIN SIGN", 5, INK)
-    draw_centered(cv, WIDTH // 2, 374, "PEACE DECLARATION", 5, RED_DARK)
-    draw_paragraph(
-        cv, 62, 420,
-        "4 POINTS: UN REFORM, OIL SUPPLY, ICC LIMITS, NUCLEAR "
-        "TALKS. NO DEAL ON UKRAINE. US-CHINA TRADE TRUCE EXTENDED.",
-        2, (52, 52, 58), 900, line_gap=4, align="center", max_lines=2)
-    cv.rect(24, 456, 976, 3, GOLD)
-    # Six panels, three across and two down.
-    pw, ph, gap = 317, 208, 12
-    for idx, panel in enumerate(PANELS):
-        col = idx % 3
-        row = idx // 3
-        px = 24 + col * (pw + gap)
-        py = 466 + row * (ph + 8)
-        draw_panel(cv, px, py, pw, ph, panel)
-    # Footer briefs, wrapped and centred.
-    draw_paragraph(
-        cv, 32, 898,
-        "ALSO: CHIP CURBS TAKE EFFECT - LICENCES FOR AI CHIPS. "
-        "ZVEREV SWEEPS GROUP 3-0, SHELTON IN SEMIS. VOYAGER 1 ONE "
-        "LIGHT-DAY OUT. GTA VI ROLLS OUT WORLDWIDE.",
-        2, INK, 960, line_gap=4, align="center", max_lines=3)
-    # Bottom credit bar.
-    cv.rect(0, 968, WIDTH, 56, NAVY)
-    cv.rect(0, 968, WIDTH, 4, GOLD)
-    draw_centered(cv, WIDTH // 2, 988,
-                  "DRAWN IN CODE - NO PHOTOGRAPHS - THE WORLD IN ONE DAY",
-                  2, WHITE)
+    cv = Canvas(WIDTH, HEIGHT, PAGE)
+
+    # Masthead: slate band, calendar box, date as largest text.
+    cv.rect(0, 0, WIDTH, 116, SLATE_DARK)
+    cv.rect(0, 112, WIDTH, 4, AMBER)
+    cv.rect(14, 13, 88, 90, WHITE)
+    cv.frame(14, 13, 88, 90, AMBER, 3)
+    draw_centered(cv, 58, 19, "NOV", 2, SLATE)
+    draw_centered(cv, 58, 40, "19", 5, C_SHENZHEN)
+    draw_centered(cv, 58, 84, "THU 2026", 1, SLATE)
+    draw_text(cv, 122, 18, "THURSDAY 19 NOVEMBER 2026", 5, WHITE)
+    draw_text(cv, 124, 62, "THE WORLD IN ONE DAY", 3, AMBER_SOFT)
+    draw_text(cv, 124, 92,
+              "37 STORIES - 7 REGIONS - ALL FROM THIS ONE THURSDAY",
+              2, WHITE)
+
+    # Figures strip: amber band, 8 cells.
+    cv.rect(0, 116, WIDTH, 52, AMBER)
+    draw_text(cv, 14, 120, "THE DAY IN FIGURES", 1, SLATE_DARK)
+    stats = [("9-6", "ICJ VOTE"), ("-1,101", "DOW POINTS"),
+             ("-2.02%", "S+P 500"), ("+17%", "ANT CLOSE"),
+             ("$81.3BN", "ANT RAISED"), ("5,500+", "EBOLA DEAD"),
+             ("203,000", "JOBLESS CLAIMS"), ("$3,625", "GOLD LOW")]
+    for i, (big, small) in enumerate(stats):
+        cx = 12 + i * 126
+        draw_text(cv, cx, 134, big, 2, SLATE_DARK)
+        draw_text(cv, cx, 154, small, 1, SLATE_DARK)
+
+    # Hero row: 3 panels.
+    hy, hh = 176, 184
+    hw = 325
+    panel(cv, 12, hy, hw, hh, 1, "SHENZHEN - SUMMIT",
+          C_SHENZHEN, "TRUMP XI PUTIN SIGN PEACE DECLARATION",
+          "FIRST-EVER THREE-WAY SUMMIT, KYLIN VILLA, 1H45M. "
+          "4 POINTS: UN REFORM, REFINED OIL, ICC LIMITS, NUCLEAR "
+          "DIALOGUE. NO DEAL ON UKRAINE OR IRAN.",
+          "REPORTED - AP / REUTERS / AFP", head_scale=3)
+    panel(cv, 350, hy, hw, hh, 2, "THE HAGUE - COURT",
+          C_ICJ, "WORLD COURT: MYANMAR DID COMMIT GENOCIDE",
+          "ICJ RULES 9-6 ON ROHINGYA, PRESIDENT IWASAWA. CASE BY "
+          "THE GAMBIA, 2019. ABOUT 10,000 KILLED IN 2017. FIRST "
+          "STATE HELD TO GENOCIDE. REPARATIONS ORDERED.",
+          "OFFICIAL - ICJ / AP / BBC", head_scale=3)
+    panel(cv, 687, hy, hw, hh, 3, "NEW YORK - MARKETS",
+          C_MARKET, "WALL STREET ROUT: S+P SIXTH LOSS IN A ROW",
+          "S+P 7,175.83 -2.02%. DOW -1,101 TO 49,097, FIRST CLOSE "
+          "UNDER 50,000 SINCE JUNE. NASDAQ -2.25%. VIX 28.5. "
+          "HAWKISH FED MINUTES BEHIND IT.",
+          "REPORTED - MARKET WIRES", head_scale=3)
+
+    # Row 2: 5 panels.
+    ry, rh, rw = 368, 158, 193
+    panel(cv, 12, ry, rw, rh, 4, "NASDAQ - TECH", C_TECH,
+          "ANTHROPIC CLOSES +17% ON DEBUT",
+          "ANT OPENS $111.50 (+34%), CLOSES $97.17. PRICED $83. "
+          "AMODEI SIBLINGS RANG THE BELL.", "REPORTED - NASDAQ / WIRES")
+    panel(cv, 213, ry, rw, rh, 5, "BERLIN - UKRAINE", C_BERLIN,
+          "30 HEADS BACK KYIV IN BERLIN",
+          "MERZ MACRON BURNHAM HOST. ZELENSKYY, RUTTE, VON DER "
+          "LEYEN, WITKOFF + KUSHNER THERE. EUR45BN LOAN ON TABLE.",
+          "REPORTED - REUTERS / BBC")
+    panel(cv, 414, ry, rw, rh, 6, "GULF - CONFLICT", C_GULF,
+          "IRAN DRONES HIT US BASE IN KUWAIT",
+          "ALI AL-SALEM HIT WED. TANKER STRUCK NEAR KHASAB IN "
+          "HORMUZ. NO NEW STRIKES THU.", "REPORTED - AP / GULF NEWS")
+    panel(cv, 615, ry, rw, rh, 7, "ANTALYA - CLIMATE", C_COP,
+          "COP31 DRAFT CUTS FOSSIL FUELS",
+          "DRAFT SLIMS 144 TO 80 LINES, EVERY FOSSIL-FUEL LINE "
+          "OUT. DEAL STILL NOT DONE.", "REPORTED - UN NEWS / WIRES")
+    panel(cv, 816, ry, rw, rh, 8, "CONGO - HEALTH", C_EBOLA,
+          "EBOLA DEATHS PASS 5,500",
+          "5,568 DEAD, 11,376 CASES. AFRICA CDC: STILL NOT UNDER "
+          "CONTROL.", "OFFICIAL - AFRICA CDC / REUTERS")
+
+    # Row 3: 5 panels.
+    r3y = 534
+    panel(cv, 12, r3y, rw, rh, 9, "FLORIDA - WEATHER", C_FLORIDA,
+          "BROWARD SCHOOLS SHUT AFTER FLOODS",
+          "SCHOOLS CLOSED THU AFTER 12-15 IN OF RAIN FLOODED "
+          "HOLLYWOOD. I-95 SHUT, 300+ CALLS.", "OFFICIAL - NWS MIAMI / CNN")
+    panel(cv, 213, r3y, rw, rh, 10, "WASHINGTON - TRADE", C_CHIP,
+          "US CHIP CURBS START TODAY",
+          "LICENCES NOW NEEDED FOR AI CHIPS TO SINGAPORE, "
+          "MALAYSIA, INDONESIA, THAILAND, BRAZIL.", "OFFICIAL - US COMMERCE / WIRES")
+    panel(cv, 414, r3y, rw, rh, 11, "GLOBAL - GAMES", C_GTA,
+          "GTA VI ROLLS OUT WORLDWIDE",
+          "BACK TO VICE CITY, LEONIDA. JASON + LUCIA LEAD. "
+          "$79.99, 13 YEARS AFTER GTA V.", "REPORTED - XBOX / BBC")
+    panel(cv, 615, r3y, rw, rh, 12, "SPACE - NASA", C_SPACE,
+          "NASA CONFIRMS: VOYAGER ONE LIGHT-DAY OUT",
+          "NASA CONFIRMS THU THE MILESTONE: 16.1BN MILES, RADIO "
+          "NOW TAKES ABOUT 24H ONE WAY.", "OFFICIAL - NASA / JPL")
+    panel(cv, 816, r3y, rw, rh, 13, "TURIN - TENNIS", C_SPORT,
+          "ZVEREV SWEEPS GROUP 3-0",
+          "BEATS FILS 6-4 7-6. NO SETS DROPPED. SHELTON JOINS "
+          "HIM IN ATP FINALS SEMIS.", "REPORTED - ATP / WIRES")
+
+    # Bottom band: also list (left) + pin map / legend (right).
+    by, bh = 700, 218
+    cv.rect(12, by, 688, bh, WHITE)
+    cv.frame(12, by, 688, bh, SLATE, 2)
+    draw_text(cv, 20, by + 7, "ALSO ON THURSDAY - 24 MORE STORIES",
+              2, SLATE_DARK)
+    also = [
+        "14 GOLD $3,624.62, DOWN 2.68%, A 14-MONTH LOW",
+        "15 US JOBLESS CLAIMS 203,000, ABOVE 197K FORECAST",
+        "16 PHILLY FED FACTORY INDEX 6.3, FAR UNDER 20 FORECAST",
+        "17 ASIA EARLY: TAIEX -3.73%, HANG SENG -1.89%",
+        "18 KOSPI -1.60% EARLY; BRENT STEADIES NEAR $91.43",
+        "19 HOUTHI MISSILE THREAT TO RIYADH: DEBRIS DAMAGE",
+        "20 SENATE REPUBLICANS REJECT IRAN WAR-POWERS LIMIT",
+        "21 UK PLEDGES 1,000 LONG-RANGE DRONES FOR UKRAINE",
+        "22 GULF STATES, PAKISTAN, TURKEY PUSH TALKS TO STOP WAR",
+        "23 TANKER STRUCK NEAR KHASAB, OMAN: CREW REPORTED SAFE",
+        "24 ADNOC VESSEL ATTACK: 1 CREW MISSING, 11 INJURED",
+        "25 BAHRAIN STOPS A 4TH ATTACK WAVE IN 6 DAYS",
+        "26 ANT TRADED 846M SHARES, MOST-TRADED ON NASDAQ",
+        "27 40 DELEGATIONS AT BERLIN COALITION TALKS",
+        "28 TRUMP-XI EXTEND TRADE TRUCE, TERMS NOT DISCLOSED",
+        "29 DECLARATION PLEDGES STATE CONSENT, ICC LIMITS",
+        "30 EBOLA: HEALTH WORKERS STRIKE OVER UNPAID WAGES",
+        "31 COP31: 21 ISSUES STILL OPEN AS SUMMIT NEARS END",
+        "32 GTA VI: BBC ESTIMATES SALES TOP $2.3BN, A RECORD",
+        "33 VOYAGER SIGNALS TAKE ABOUT 48H ROUND TRIP",
+        "34 FED MINUTES: ALMOST ALL MEMBERS SAW MORE HIKES",
+        "35 DECEMBER HIKE PRICED AT ABOUT 96% AFTER MINUTES",
+        "36 S+P BROKE BELOW ITS 200-DAY AVERAGE ON THU",
+        "37 ALL 11 S+P SECTORS FINISHED LOWER ON THU",
+    ]
+    for i, line in enumerate(also):
+        col = i % 2
+        row = i // 2
+        lx = 20 + col * 344
+        ly = by + 30 + row * 15
+        draw_text(cv, lx, ly, line, 1, BODY_INK)
+
+    # Right box: dot-grid pin map + how-sure legend.
+    mx = 708
+    cv.rect(mx, by, 304, bh, SLATE)
+    draw_text(cv, mx + 10, by + 8, "WHERE IT HAPPENED", 2, AMBER_SOFT)
+    pins = [(770, 782, "1"), (812, 762, "2"), (736, 762, "3"),
+            (742, 786, "5"), (796, 796, "6"), (824, 782, "8"),
+            (728, 806, "9"), (872, 806, "11"), (856, 762, "13")]
+    for gy in range(by + 44, by + 128, 12):
+        for gx in range(mx + 14, mx + 292, 12):
+            cv.rect(gx, gy, 2, 2, (90, 104, 124))
+    for px_, py_, n in pins:
+        cv.circle(px_, py_, 8, AMBER)
+        draw_centered(cv, px_, py_ - 3, n, 1, SLATE_DARK)
+    draw_text(cv, mx + 10, by + 138, "HOW SURE ARE WE?", 2, WHITE)
+    draw_text(cv, mx + 10, by + 162,
+              "REPORTED: 2+ OUTLETS AGREE", 1, AMBER_SOFT)
+    draw_text(cv, mx + 10, by + 178,
+              "OFFICIAL: THE BODY ITSELF SAID IT", 1, AMBER_SOFT)
+    draw_text(cv, mx + 10, by + 194,
+              "CLAIM: ONE SIDE ONLY, LABELLED SO", 1, AMBER_SOFT)
+
+    # Date-check footer.
+    fy = 926
+    cv.rect(0, fy, WIDTH, HEIGHT - fy, SLATE_DARK)
+    cv.rect(0, fy, WIDTH, 4, AMBER)
+    draw_text(cv, 14, fy + 10,
+              "DATE CHECK: EVERY STORY ABOVE IS FROM THURSDAY "
+              "19 NOVEMBER 2026", 2, AMBER_SOFT)
+    draw_text(cv, 14, fy + 32,
+              "LEFT OUT AS EARLIER NEWS: JEFFRIES NOMINATED WED 18. "
+              "ANT PRICED WED 18.", 1, WHITE)
+    draw_text(cv, 14, fy + 46,
+              "HEGSETH VENEZUELA DEAL WED 18. EUR45BN LOAN PROPOSED "
+              "WED 18.", 1, WHITE)
+    draw_text(cv, 14, fy + 60,
+              "LEFT OUT AS UNVERIFIED: NORTH KOREA MISSILE CLAIM. "
+              "CRIMEAN BRIDGE CLAIM.", 1, WHITE)
+    draw_text(cv, 14, fy + 74,
+              "NOT YET HAPPENED: COP31 FINAL DEAL, DUE FRI 20. "
+              "HOUSE SPEAKER VOTE, JAN 3.", 1, WHITE)
     return cv
 
 
